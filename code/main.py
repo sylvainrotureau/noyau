@@ -1,7 +1,10 @@
 import random
 from combat import combat
 from creatures import creer_creature
-from duplicants import creer_duplicants, Duplicant # Assurez-vous d'importer Duplicant
+from duplicants import creer_duplicants, Duplicant  # Assurez-vous d'importer Duplicant
+
+objets_possibles = ["Pierre étrange", "Herbe médicinale", "Fragment de métal", "Cristal bleu"]
+
 
 def afficher_aide():
     print("Commandes disponibles:")
@@ -11,6 +14,8 @@ def afficher_aide():
     print("  inventaire - Affiche l'inventaire")
     print("  sauvegarder - Sauvegarde la partie (bientôt disponible)")
     print("  duplicants - Affiche les détails des Duplicants")
+    print("  utiliser - Permet d'utiliser un objet de l'inventaire")
+
 
 def explorer(duplicants):
     print("Vous entrez dans un nouveau niveau...")
@@ -24,7 +29,10 @@ def explorer(duplicants):
     elif evenement == 2:
         print("Une légère brise vous frôle, vous donnant la chair de poule.")
     elif evenement == 3:
-        print("Vous trouvez une petite pierre brillante sur le sol.")
+        objet_trouve = random.choice(objets_possibles)
+        print(f"Vous trouvez un(e) {objet_trouve}!")
+        # Ajouter l'objet à l'inventaire d'un Duplicant (par exemple, le premier)
+        duplicants[0].inventaire.append(objet_trouve)
     elif evenement == 4:  # Nouvelle condition pour le combat
         print("Soudain, une créature surgit devant vous!")
         creature = creer_creature()  # Obtenir une créature de creatures.py
@@ -47,6 +55,7 @@ def explorer(duplicants):
     else:
         print("Choix invalide.")
 
+
 def main():
     print("Bienvenue dans Galactic Scavengers : L'Ascension des Duplicants!")
     print("Vous êtes au Portal, le point de départ de votre aventure.")
@@ -62,8 +71,60 @@ def main():
             break
         elif commande == "explorer":
             explorer(duplicants)
+        elif commande == "utiliser":
+            print("\nUtiliser un objet")
+            print("\nVotre équipe de Duplicants:")
+            for i, duplicant in enumerate(duplicants):
+                print(f"{i + 1}. {duplicant.nom} ({duplicant.classe})")
+            choix_duplicant = input(
+                "Entrez le numéro du Duplicant qui va utiliser un objet (ou '0' pour revenir): ")
+            if choix_duplicant.isdigit():
+                choix_duplicant_index = int(choix_duplicant) - 1
+                if 0 <= choix_duplicant_index < len(duplicants):
+                    if duplicants[choix_duplicant_index].inventaire:
+                        print(f"\nInventaire de {duplicants[choix_duplicant_index].nom} :")
+                        for i, objet in enumerate(duplicants[choix_duplicant_index].inventaire):
+                            print(f"{i + 1}. {objet}")
+                        choix_objet = input("Entrez le numéro de l'objet à utiliser : ")
+                        if choix_objet.isdigit():
+                            choix_objet_index = int(choix_objet) - 1
+                            if 0 <= choix_objet_index < len(
+                                    duplicants[choix_duplicant_index].inventaire):
+                                print(
+                                    f"Vous utilisez {duplicants[choix_duplicant_index].inventaire[choix_objet_index]}...")
+                                #  Ajouter ici la logique d'utilisation de l'objet
+                                del duplicants[choix_duplicant_index].inventaire[
+                                    choix_objet_index]  # Supprimer l'objet de l'inventaire après utilisation
+                            else:
+                                print("Choix d'objet invalide.")
+                        else:
+                            print("Choix d'objet invalide.")
+                    else:
+                        print(f"{duplicants[choix_duplicant_index].nom} n'a rien dans son inventaire.")
+                elif choix_duplicant_index == -1:
+                    print("Retour à l'écran principal.")
+                else:
+                    print("Choix de Duplicant invalide.")
+            else:
+                print("Choix de Duplicant invalide.")
+
         elif commande == "inventaire":
-            print("Votre inventaire est vide.")
+            print("\nInventaire")
+            print("\nVotre équipe de Duplicants:")
+            for i, duplicant in enumerate(duplicants):
+                print(f"{i + 1}. {duplicant.nom} ({duplicant.classe})")
+            choix = input("Entrez le numéro du Duplicant pour voir son inventaire (ou '0' pour revenir): ")
+            if choix.isdigit():
+                choix_index = int(choix) - 1
+                if 0 <= choix_index < len(duplicants):
+                    print(
+                        f"Inventaire de {duplicants[choix_index].nom} : {', '.join(duplicants[choix_index].inventaire) if duplicants[choix_index].inventaire else 'Vide'}")
+                elif choix_index == -1:
+                    print("Retour à l'écran principal.")
+                else:
+                    print("Choix invalide.")
+            else:
+                print("Choix invalide.")
         elif commande == "sauvegarder":
             print("Fonctionnalité de sauvegarde à venir...")
         elif commande == "duplicants":
@@ -83,6 +144,7 @@ def main():
                 print("Choix invalide.")
         else:
             print("Commande inconnue. Tapez 'help' pour obtenir de l'aide.")
+
 
 if __name__ == "__main__":
     main()
