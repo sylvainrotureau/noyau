@@ -1,5 +1,7 @@
-import random  # Importez le module random en haut du fichier
-from duplicants import creer_duplicants # Si vous mettez les classes dans un fichier séparé
+import random
+from combat import combat
+from creatures import creer_creature
+from duplicants import creer_duplicants, Duplicant # Assurez-vous d'importer Duplicant
 
 def afficher_aide():
     print("Commandes disponibles:")
@@ -10,7 +12,7 @@ def afficher_aide():
     print("  sauvegarder - Sauvegarde la partie (bientôt disponible)")
     print("  duplicants - Affiche les détails des Duplicants")
 
-def explorer(duplicants): # Accepter la liste des Duplicants
+def explorer(duplicants):
     print("Vous entrez dans un nouveau niveau...")
     print("L'air est lourd et humide, et des ombres dansent sur les murs.")
     print("Un faible écho résonne au loin.")
@@ -25,17 +27,8 @@ def explorer(duplicants): # Accepter la liste des Duplicants
         print("Vous trouvez une petite pierre brillante sur le sol.")
     elif evenement == 4:  # Nouvelle condition pour le combat
         print("Soudain, une créature surgit devant vous!")
-        creature = {"nom": "Hatchling", "niveau": 1, "type": "Base"}  # Créature simple pour commencer
-        combat(duplicants, creature) # Lancer le combat
-    elif evenement == 4:
-        print("Soudain, une créature surgit devant vous!")
-        creatures = [
-            {"nom": "Hatchling", "niveau": 1, "type": "Base"},
-            {"nom": "Lombricule", "niveau": 2, "type": "Acide"},
-            {"nom": "Morb", "niveau": 3, "type": "Toxique"}
-        ]
-        creature = random.choice(creatures) # Choisir une créature aléatoirement
-        combat(duplicants, creature)
+        creature = creer_creature()  # Obtenir une créature de creatures.py
+        combat(duplicants, creature)  # Lancer le combat (de combat.py)
 
     print("Où voulez-vous aller ?")
     print("1. Aller à gauche (un couloir étroit et sombre)")
@@ -54,75 +47,6 @@ def explorer(duplicants): # Accepter la liste des Duplicants
     else:
         print("Choix invalide.")
 
-def tour_joueur(duplicants, creature, creature_pv):
-    print("\n-- Tour des Duplicants --")
-    for duplicant in duplicants:
-        if duplicant.vie > 0:
-            print(f"\n{duplicant.nom} ({duplicant.classe}) agit.")
-            print("Choisissez une action :")
-            print("1. Attaque de base")  # Pour l'instant, c'est la seule option
-            choix = input("Entrez le numéro de l'action : ")
-            if choix == "1":
-                degats = duplicant.attaque - creature['niveau'] # Exemple de calcul de dégâts
-                if degats < 0:
-                    degats = 0
-                print(f"{duplicant.nom} attaque {creature['nom']} et inflige {degats} dégâts.")
-                creature_pv -= degats
-                return creature_pv
-            else:
-                print("Choix invalide. Attaque de base utilisée.")
-                degats = duplicant.attaque - creature['niveau']
-                if degats < 0:
-                    degats = 0
-                print(f"{duplicant.nom} attaque {creature['nom']} et inflige {degats} dégâts.")
-                creature_pv -= degats
-                return creature_pv
-    return creature_pv
-
-def tour_creature(duplicants, creature):
-    print(f"\n-- Tour de {creature['nom']} --")
-    duplicant_cible = random.choice([d for d in duplicants if d.vie > 0])  # Cibler un Duplicant vivant au hasard
-    attaque_choix = random.randint(1, 2)
-    if attaque_choix == 1:
-        degats = creature['niveau'] * 2  # Attaque normale
-        print(f"{creature['nom']} attaque {duplicant_cible.nom} et inflige {degats} dégâts.")
-    elif attaque_choix == 2:
-        degats = creature['niveau']  # Attaque faible
-        print(f"{creature['nom']} tente une attaque rapide sur {duplicant_cible.nom} et inflige {degats} dégâts.")
-    else:
-        degats = creature['niveau']
-        print(f"{creature['nom']} attaque {duplicant_cible.nom} et inflige {degats} dégâts.")
-    duplicant_cible.vie -= degats
-    print(f"{duplicant_cible.nom} a maintenant {duplicant_cible.vie} PV.")
-    if duplicant_cible.vie <= 0:
-        print(f"{duplicant_cible.nom} est mort!")
-
-def combat(duplicants, creature):
-    print(f"\n--- Combat engagé contre {creature['nom']} (Niveau {creature['niveau']}) ---")
-
-    # Initialiser les PV
-    for duplicant in duplicants:
-        duplicant.vie = duplicant.vie  # Réinitialiser les PV au max (ou garder les PV actuels)
-    creature_pv = 50 * creature['niveau']  # Exemple : PV de la créature = 50 * niveau
-
-    print(f"{creature['nom']} a {creature_pv} PV.")
-
-    tour = 1
-    while creature_pv > 0 and any(duplicant.vie > 0 for duplicant in duplicants):
-        print(f"\n--- Tour {tour} ---")
-        degats = tour_joueur(duplicants, creature, creature_pv)
-        creature_pv -= degats
-        if creature_pv > 0:
-            tour_creature(duplicants, creature)
-        tour += 1
-
-    if creature_pv <= 0:
-        print(f"\nVous avez vaincu {creature['nom']}!")
-    else:
-        print("\nVos Duplicants ont été vaincus...")
-        print("Le Portal attend votre prochaine équipe.") # Message temporaire
-    print("--- Fin du combat ---")
-
 def main():
     print("Bienvenue dans Galactic Scavengers : L'Ascension des Duplicants!")
     print("Vous êtes au Portal, le point de départ de votre aventure.")
@@ -137,7 +61,7 @@ def main():
             print("Merci d'avoir joué!")
             break
         elif commande == "explorer":
-            explorer(duplicants) # Passer les Duplicants à explorer
+            explorer(duplicants)
         elif commande == "inventaire":
             print("Votre inventaire est vide.")
         elif commande == "sauvegarder":
