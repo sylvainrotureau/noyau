@@ -8,18 +8,25 @@ class Duplicant:
         self.soin = soin
         self.stress = stress
         self.inventaire = []
-        self.competences = self.definir_competences()  # Ajout des compétences
+        self.competences = self.definir_competences()
 
     def definir_competences(self):
-        # Définir les compétences de base pour chaque classe
         if self.classe == "Brute":
-            return ["Frappe puissante"]
+            return [
+                {"nom": "Frappe puissante", "type": "attaque", "puissance": 2.0, "effet": None},
+            ]
         elif self.classe == "Éclaireur":
-            return ["Tir rapide"]
+            return [
+                {"nom": "Tir rapide", "type": "attaque", "puissance": 1.0, "effet": "defense_baisse"},
+            ]
         elif self.classe == "Ingénieur":
-            return ["Construire tourelle"]
+            return [
+                {"nom": "Construire tourelle", "type": "autre", "puissance": 0, "effet": None},
+            ]
         elif self.classe == "Chimiste":
-            return ["Jet acide"]
+            return [
+                {"nom": "Jet acide", "type": "attaque", "puissance": 1.5, "effet": "attaque_baisse"},
+            ]
         else:
             return []
 
@@ -27,13 +34,9 @@ class Duplicant:
         print(f"Nom: {self.nom}, Classe: {self.classe}")
         print(f"  ATT: {self.attaque}, DEF: {self.defense}, PV: {self.vie}, SOI: {self.soin}, STR: {self.stress}")
         print(f"  Inventaire: {', '.join(self.inventaire) if self.inventaire else 'Vide'}")
-        print(f"  Compétences: {', '.join(self.competences) if self.competences else 'Aucune'}")
-
-def creer_duplicants():
-    duplicants = [
-        Duplicant("Kael", "Brute", 15, 12, 100, 0, 50),
-        Duplicant("Lyra", "Éclaireur", 12, 8, 80, 0, 60),
-        Duplicant("Ren", "Ingénieur", 8, 10, 90, 10, 40),
-        Duplicant("Zara", "Chimiste", 10, 9, 70, 15, 55)
-    ]
-    return duplicants
+        print("  Compétences:")
+        if self.competences:
+            for i, competence in enumerate(self.competences):
+                print(f"    {i + 1}. {competence['nom']} ({competence['type']})")
+        else:
+            print("    Aucune")
