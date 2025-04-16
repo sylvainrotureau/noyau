@@ -26,29 +26,54 @@ def combat(duplicants, creature):
         print("Le Portal attend votre prochaine équipe.")  # Message temporaire
     print("--- Fin du combat ---")
 
+def utiliser_competence(duplicant, competence, creature):
+    if competence == "Frappe puissante":
+        degats = duplicant.attaque * 2 - creature['niveau']  # Exemple : Dégâts plus élevés
+        print(f"{duplicant.nom} utilise Frappe puissante et inflige {degats} dégâts!")
+        return degats
+    elif competence == "Tir rapide":
+        degats = duplicant.attaque - creature['niveau']  # Exemple : Dégâts normaux
+        print(f"{duplicant.nom} utilise Tir rapide et inflige {degats} dégâts!")
+        return degats
+    elif competence == "Construire tourelle":
+        # Logique pour construire une tourelle (à implémenter plus tard)
+        print(f"{duplicant.nom} tente de construire une tourelle (Fonctionnalité non implémentée)!")
+        return 0
+    elif competence == "Jet acide":
+        degats = duplicant.attaque * 1.5 - creature['niveau']  # Exemple : Dégâts moyens
+        print(f"{duplicant.nom} utilise Jet acide et inflige {degats} dégâts!")
+        return degats
+    else:
+        print(f"{duplicant.nom} tente d'utiliser une compétence inconnue!")
+        return 0
+
 def tour_joueur(duplicants, creature, creature_pv):
     print("\n-- Tour des Duplicants --")
     for duplicant in duplicants:
         if duplicant.vie > 0:
             print(f"\n{duplicant.nom} ({duplicant.classe}) agit.")
             print("Choisissez une action :")
-            print("1. Attaque de base")  # Pour l'instant, c'est la seule option
+            print("1. Attaque de base")
+            if duplicant.competences:
+                for i, competence in enumerate(duplicant.competences):
+                    print(f"{i + 2}. {competence}")  # Les compétences commencent à partir de 2
             choix = input("Entrez le numéro de l'action : ")
             if choix == "1":
-                degats = duplicant.attaque - creature['niveau']  # Exemple de calcul de dégâts
+                degats = duplicant.attaque - creature['niveau']
                 if degats < 0:
                     degats = 0
                 print(f"{duplicant.nom} attaque {creature['nom']} et inflige {degats} dégâts.")
-                creature_pv -= degats
-                return creature_pv
+            elif choix.isdigit() and int(choix) >= 2 and int(choix) <= len(duplicant.competences) + 1:
+                choix_competence = int(choix) - 2  # Ajuster l'index pour la liste
+                degats = utiliser_competence(duplicant, duplicant.competences[choix_competence], creature)
             else:
                 print("Choix invalide. Attaque de base utilisée.")
                 degats = duplicant.attaque - creature['niveau']
                 if degats < 0:
                     degats = 0
                 print(f"{duplicant.nom} attaque {creature['nom']} et inflige {degats} dégâts.")
-                creature_pv -= degats
-                return creature_pv
+            creature_pv -= degats
+            return creature_pv
     return creature_pv
 
 def tour_creature(duplicants, creature):
