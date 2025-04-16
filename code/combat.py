@@ -7,9 +7,9 @@ def combat(duplicants, creature):
     # Initialiser les PV et la défense
     for duplicant in duplicants:
         duplicant.vie = duplicant.vie
-    creature_pv = 60 * creature['niveau']  # Ajustement des PV
+    creature_pv = 60 * creature['niveau']
     creature_defense = creature['niveau'] * 2
-    creature_attaque = creature['niveau'] * 2 + 2 # Ajustement de l'attaque de base
+    creature_attaque = creature['niveau'] * 2 + 2
     effets_creature = {}
 
     print(f"{creature['nom']} (Niveau {creature['niveau']}) a {creature_pv} PV, {creature_defense} DEF et {creature_attaque} ATT.")
@@ -19,11 +19,16 @@ def combat(duplicants, creature):
         print(f"\n--- Tour {tour} ---")
         creature_pv = tour_joueur(duplicants, creature, creature_attaque, creature_defense, creature_pv, effets_creature)
         if creature_pv > 0:
-            tour_creature(duplicants, creature, effets_creature)
+            tour_creature(duplicants, creature, effets_creature, duplicants)  # Passer les duplicants
         tour += 1
 
     if creature_pv <= 0:
         print(f"\nVous avez vaincu {creature['nom']}!")
+        # Récompenser les Duplicants avec de l'expérience
+        xp_gagne = 20 * creature['niveau']
+        for duplicant in duplicants:
+            if duplicant.vie > 0:
+                duplicant.gagner_experience(xp_gagne)
     else:
         print("\nVos Duplicants ont été vaincus...")
         print("Le Portal attend votre prochaine équipe.")
@@ -34,7 +39,7 @@ def tour_joueur(duplicants, creature, creature_attaque_base, creature_defense, c
     print("\n-- Tour des Duplicants --")
     for duplicant in duplicants:
         if duplicant.vie > 0:
-            print(f"\n{duplicant.nom} ({duplicant.classe}) agit.")
+            print(f"\n{duplicant.nom} ({duplicant.classe}, Niveau {duplicant.niveau}) agit.") # Afficher le niveau
             print("Choisissez une action :")
             print("1. Attaque de base")
             if duplicant.competences:
@@ -91,7 +96,7 @@ def utiliser_competence(duplicant, competence, creature, effets_creature):
         return 0
 
 
-def tour_creature(duplicants, creature, effets_creature):
+def tour_creature(duplicants, creature, effets_creature, duplicants_vivants):  # Passer les duplicants vivants
     print(f"\n-- Tour de {creature['nom']} --")
 
     # Calculer l'attaque de la créature
@@ -99,7 +104,7 @@ def tour_creature(duplicants, creature, effets_creature):
     if "attaque_baisse" in effets_creature:
         attaque_creature = int(attaque_creature * 0.8)
 
-    duplicant_cible = random.choice([d for d in duplicants if d.vie > 0])
+    duplicant_cible = random.choice([d for d in duplicants_vivants if d.vie > 0])
     attaque_choix = random.randint(1, 2)
     if attaque_choix == 1:
         degats = attaque_creature
@@ -109,8 +114,8 @@ def tour_creature(duplicants, creature, effets_creature):
         print(f"{creature['nom']} tente une attaque rapide sur {duplicant_cible.nom} et inflige {degats} dégâts.")
 
     # Ajouter une attaque spéciale pour certaines créatures
-    if creature["attaque_speciale"] and random.random() < 0.3:  # 30% de chance d'utiliser l'attaque spéciale
-        degats = int(attaque_creature * 1.2)  # Dégâts légèrement augmentés
+    if creature["attaque_speciale"] and random.random() < 0.3:
+        degats = int(attaque_creature * 1.2)
         print(f"{creature['nom']} utilise {creature['attaque_speciale']} et inflige {degats} dégâts!")
     duplicant_cible.vie -= degats
     print(f"{duplicant_cible.nom} a maintenant {duplicant_cible.vie} PV.")
